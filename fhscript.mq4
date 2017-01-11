@@ -5,23 +5,33 @@ int start() {
    
    int intCurrentOrder;
    int ticket;
-   int totalIMANeg = 0;
-   int totalADXNeg = 0;
    bool haveThisSymbol = false;
+   
+   int totaliIMA = 0;
+   int totaliADX = 0;
+   int totaliForce = 0;
+   
  
    
-   double imaM1 = iMA(NULL,PERIOD_M1,13,5,MODE_SMMA,PRICE_MEDIAN,0);
-   double imaM5 = iMA(NULL,PERIOD_M5,13,5,MODE_SMMA,PRICE_MEDIAN,0);
+   double imaM1 = iMA(NULL,PERIOD_M1,13,5,MODE_SMMA,PRICE_MEDIAN,0)*10;
+   double imaM5 = iMA(NULL,PERIOD_M5,13,5,MODE_SMMA,PRICE_MEDIAN,0)*10;
       
    double iADXM1 = iADX(NULL,PERIOD_M1,13,PRICE_CLOSE,MODE_MAIN,0);
    double iADXM5 = iADX(NULL,PERIOD_M5,13,PRICE_CLOSE,MODE_MAIN,0);
+   
+   double iForceM1 = iForce(NULL,PERIOD_M1,13,MODE_SMA,PRICE_CLOSE,0)*1000;
+   double iForceM5 = iForce(NULL,PERIOD_M5,13,MODE_SMA,PRICE_CLOSE,0)*1000;
+
 
      
-   if ((Bid - imaM1) < 0) { totalIMANeg++; }
-   if ((Bid - imaM5) < 0) { totalIMANeg++; }
+   if ((Bid - imaM1) > 0) { totaliIMA++; }
+   if ((Bid - imaM5) > 0) { totaliIMA++; }
    
-   if ((iADXM1) < 30) { totalADXNeg++; }
-   if ((iADXM5) < 30) { totalADXNeg++; }
+   if ((iADXM1) < 30) { totaliADX++; }
+   if ((iADXM5) < 30) { totaliADX++; }
+   
+   if ((iForceM1) > 0) { totaliForce++; }
+   if ((iForceM5) > 0) { totaliForce++; }
    
    
   
@@ -31,8 +41,10 @@ int start() {
             "\nimaM5 : " +  DoubleToStr(Bid - imaM5, 2) + 
             "\niADXM1 : " +  DoubleToStr(iADXM1, 0) +
             "\niADXM5 : " +  DoubleToStr(iADXM5, 0) +
-            "\n\ntotalNeg: " + DoubleToStr(totalIMANeg, 0) +
-            "\n\totalADXNeg: " + DoubleToStr(totalADXNeg, 0)
+            "\niForceM1 : " +  DoubleToStr(iForceM1, 2) +
+            "\niForceM5 : " +  DoubleToStr(iForceM5, 2) +
+            "\n\ntotaliIMA: " + DoubleToStr(totaliIMA, 0) +
+            "\n\totaliADX: " + DoubleToStr(totaliADX, 0)
           );
           
     
@@ -43,19 +55,11 @@ int start() {
          if (OrderSymbol() == Symbol()) {haveThisSymbol = true;}
       }
       
-      if (totalADXNeg <= 0) {  //if have tendency
-         if (totalIMANeg >= 2) {  // sell 
+      if (totaliADX >= 2) { //if dont have tendency
+         if (totaliIMA >= 2) {  // sell 
             if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_SELL, dlbLot, Bid, 3, Bid+(100*Point), Bid-(100*Point), "my order#", 8777, 0, Red); }
          }
-         if (totalIMANeg <= 0) {  // buy
-            if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_BUY, dlbLot, Ask, 3, Ask-(100*Point), Ask+(100*Point), "my order#", 8777, 0, Green); }
-         }
-      }
-      if (totalADXNeg >= 2) { //if dont have tendency
-         if (totalIMANeg <= 0) {  // sell 
-            if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_SELL, dlbLot, Bid, 3, Bid+(100*Point), Bid-(100*Point), "my order#", 8777, 0, Red); }
-         }
-         if (totalIMANeg >= 2) {  // buy
+         if (totaliIMA <= 0) {  // buy
             if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_BUY, dlbLot, Ask, 3, Ask-(100*Point), Ask+(100*Point), "my order#", 8777, 0, Green); }
          }
       } 
