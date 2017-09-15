@@ -1,7 +1,7 @@
 int start() {
  
-   int intMaxOrders = 6;
-   double dlbLot = 0.1;
+   int intMaxOrders = 4;
+   double dlbLot = 0.3;
    
    int intCurrentOrder;
    int ticket;
@@ -11,67 +11,45 @@ int start() {
    int totaliForce = 0;
    
    
-   //double iADXM1 = iADX(NULL,PERIOD_M1,13,PRICE_CLOSE,MODE_MAIN,0);
    double iADXM5 = iADX(NULL,PERIOD_M5,13,PRICE_CLOSE,MODE_MAIN,0);
    double iADXM15 = iADX(NULL,PERIOD_M15,13,PRICE_CLOSE,MODE_MAIN,0);
    double iADXM30 = iADX(NULL,PERIOD_M30,13,PRICE_CLOSE,MODE_MAIN,0);
    
-   //double iForceM1 = iForce(NULL,PERIOD_M1,13,MODE_SMA,PRICE_CLOSE,0)*1000;
-   double iForceM5 = iForce(NULL,PERIOD_M5,13,MODE_SMA,PRICE_CLOSE,0)*1000;
-   double iForceM15 = iForce(NULL,PERIOD_M15,13,MODE_SMA,PRICE_CLOSE,0)*1000;
-   double iForceM30 = iForce(NULL,PERIOD_M30,13,MODE_SMA,PRICE_CLOSE,0)*1000;
-
+   double dbliBandsUpper = iBands(NULL,0,20,2,0,PRICE_CLOSE,MODE_UPPER,0);
+   double dbliBandsLower = iBands(NULL,0,20,2,0,PRICE_CLOSE,MODE_LOWER,0);
    
-   //if ((iADXM1) < 30) { totaliADX++; }
+   
    if ((iADXM5) < 30) { totaliADX++; }
    if ((iADXM15) < 30) { totaliADX++; }
    if ((iADXM30) < 30) { totaliADX++; }
-   
-   //if ((iForceM1) > 0) { totaliForce++; }
-   if ((iForceM5) > 0) { totaliForce++; }
-   if ((iForceM15) > 0) { totaliForce++; }
-   if ((iForceM30) > 0) { totaliForce++; }
-   
+
   
    //comment on chart
    Comment( 
-            //"\niADXM1 : " +  DoubleToStr(iADXM1, 0) +
             "\niADXM5 : " +  DoubleToStr(iADXM5, 0) +
             "\niADXM15: " +  DoubleToStr(iADXM15, 0) +
             "\niADXM30: " +  DoubleToStr(iADXM30, 0) +
-            //"\niForceM1: " +  DoubleToStr(iForceM1, 2) +
-            "\niForceM5: " +  DoubleToStr(iForceM5, 2) +
-            "\niForceM15: " +  DoubleToStr(iForceM15, 2) +
-            "\niForceM30: " +  DoubleToStr(iForceM30, 2) +
-            "\n\n\totaliADX: " + DoubleToStr(totaliADX, 0) +
-            "\n\totaliForce: " + DoubleToStr(totaliForce, 0)
+            //"\ndbliBandsUpper: " +  DoubleToStr(dbliBandsUpper, 5) +
+            //"\ndbliBandsLower: " +  DoubleToStr(dbliBandsLower, 5) +
+            //"\ndblBid: " +  DoubleToStr(Bid, 5) +
+            "\n\ntotaliADX: " + DoubleToStr(totaliADX, 0) 
           );
           
     
     //*open orders
    if (OrdersTotal() < intMaxOrders) {
+      
       for (intCurrentOrder = 0; intCurrentOrder < OrdersTotal(); intCurrentOrder++) {
          OrderSelect(intCurrentOrder, SELECT_BY_POS);
          if (OrderSymbol() == Symbol()) {haveThisSymbol = true;}
       }
       
       if (totaliADX >= 3) { //if dont have tendency
-         if (totaliForce >= 3) {  // sell 
+         if (Bid >= dbliBandsUpper) {  // sell 
             if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_SELL, dlbLot, Bid, 3, Bid+(100*Point), Bid-(100*Point), "my order#", 8777, 0, Red); }
             Sleep(300000); //5 min   
          }
-         if (totaliForce <= 0) {  // buy
-            if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_BUY, dlbLot, Ask, 3, Ask-(100*Point), Ask+(100*Point), "my order#", 8777, 0, Green); }
-            Sleep(300000); //5 min   
-         }
-      } 
-      
-      if (totaliADX <= 0) { //if have tendency
-         if (totaliForce <= 0) {  // sell 
-            if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_SELL, dlbLot, Bid, 3, Bid+(100*Point), Bid-(100*Point), "my order#", 8777, 0, Red); }
-            Sleep(300000); //5 min   
-         }
-         if (totaliForce >= 3) {  // buy
+         if (Bid <= dbliBandsLower) {  // buy
             if (!haveThisSymbol) { ticket = OrderSend(Symbol(), OP_BUY, dlbLot, Ask, 3, Ask-(100*Point), Ask+(100*Point), "my order#", 8777, 0, Green); }
             Sleep(300000); //5 min   
          }
